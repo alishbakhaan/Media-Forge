@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Restrictive ImageMagick policy used for every ImageMagick call made by the backend.
+     ImageMagick is only a fallback decoder (HEIC/HEIF, camera RAW); Pillow does everything else.
+     Deny every coder, then allow the few we need. Validate with:
+       MAGICK_CONFIGURE_PATH=backend/app/imagemagick convert -list policy -->
+<!DOCTYPE policymap [
+  <!ELEMENT policymap (policy)*>
+  <!ATTLIST policymap xmlns CDATA #FIXED "">
+  <!ELEMENT policy EMPTY>
+  <!ATTLIST policy xmlns CDATA #FIXED "">
+  <!ATTLIST policy domain NMTOKEN #REQUIRED>
+  <!ATTLIST policy name NMTOKEN #IMPLIED>
+  <!ATTLIST policy pattern CDATA #IMPLIED>
+  <!ATTLIST policy rights NMTOKEN #IMPLIED>
+  <!ATTLIST policy stealth NMTOKEN #IMPLIED>
+  <!ATTLIST policy value CDATA #IMPLIED>
+]>
+<policymap>
+  <policy domain="resource" name="memory" value="512MiB"/>
+  <policy domain="resource" name="map" value="1GiB"/>
+  <policy domain="resource" name="width" value="32KP"/>
+  <policy domain="resource" name="height" value="32KP"/>
+  <policy domain="resource" name="area" value="200MP"/>
+  <policy domain="resource" name="disk" value="2GiB"/>
+  <policy domain="resource" name="time" value="120"/>
+  <policy domain="delegate" rights="none" pattern="*"/>
+  <policy domain="filter" rights="none" pattern="*"/>
+  <policy domain="path" rights="none" pattern="@*"/>
+  <policy domain="coder" rights="none" pattern="*"/>
+  <policy domain="coder" rights="read" pattern="{HEIC,HEIF,AVIF,DNG,CR2,CR3,CRW,NEF,NRW,ARW,SR2,SRF,ORF,RW2,RAF,PEF,3FR,ERF,IIQ,K25,KDC,MEF,MRW,X3F,DCR,RAW}"/>
+  <policy domain="coder" rights="write" pattern="{PNG,PNG48,PNG64}"/>
+</policymap>

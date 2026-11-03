@@ -1,0 +1,47 @@
+{
+  "name": "mediaforge-desktop",
+  "productName": "MediaForge",
+  "version": "1.0.1",
+  "description": "Convert images, documents and videos on your own computer.",
+  "private": true,
+  "main": "main.js",
+  "author": "MediaForge",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --mac --x64",
+    "dist:win": "electron-builder --win --x64"
+  },
+  "devDependencies": {
+    "electron": "44.5.1",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.mediaforge.app",
+    "productName": "MediaForge",
+    "artifactName": "MediaForge-mac-${arch}.${ext}",
+    "directories": { "output": "dist", "buildResources": "build" },
+    "files": ["main.js", "splash.html", "package.json"],
+    "asar": true,
+    "extraResources": [
+      { "from": "dist-py/mediaforge-server", "to": "backend" },
+      { "from": "../frontend/dist", "to": "frontend" },
+      { "from": "../samples", "to": "samples", "filter": ["real/**", "derived/**", "synthetic/**", "README.md"] },
+      { "from": "ffmpeg", "to": "ffmpeg", "filter": ["**/*"] }
+    ],
+    "mac": {
+      "target": [{ "target": "dmg", "arch": ["x64"] }],
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.png",
+      "identity": null,
+      "hardenedRuntime": false,
+      "darkModeSupport": true
+    },
+    "dmg": { "title": "MediaForge ${version}" },
+    "win": { "target": [{ "target": "nsis", "arch": ["x64"] }], "icon": "build/icon.png" },
+    "nsis": {
+      "artifactName": "MediaForge-windows-${arch}-Setup.${ext}",
+      "oneClick": true, "perMachine": false, "shortcutName": "MediaForge",
+      "createDesktopShortcut": true, "createStartMenuShortcut": true, "deleteAppDataOnUninstall": false
+    }
+  }
+}

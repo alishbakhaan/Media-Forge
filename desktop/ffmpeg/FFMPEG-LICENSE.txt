@@ -1,0 +1,8 @@
+MediaForge includes FFmpeg (https://ffmpeg.org), used unmodified as separate programs (ffmpeg, ffprobe).
+
+This build is FFmpeg 9.0.2, a static macOS build by Helmut K. C. Tessarek (https://evermeet.cx/ffmpeg/).
+It is compiled with GPL components (including x264 and x265), so it is licensed under the
+GNU General Public License, version 2 or later: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+
+Source code: FFmpeg's source is at https://ffmpeg.org/download.html; the exact build configuration and
+the source of the bundled libraries are listed at https://evermeet.cx/ffmpeg/.
