@@ -1,0 +1,79 @@
+# Builds MediaForge for Windows on GitHub's Windows machines, tests real conversions there, and produces the installer.
+# Run it from the Actions tab ("Run workflow"), or push a tag like v1.0.1 to also attach the installer to a release.
+name: Build Windows app
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Put sample files in place
+        shell: bash
+        run: |
+          mkdir -p samples
+          for d in real derived synthetic; do
+            if [ -d "$d" ] && [ ! -d "samples/$d" ]; then mv "$d" "samples/$d"; fi
+          done
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Python packages
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r backend/requirements.txt pyinstaller
+
+      - name: Background-removal model and FFmpeg
+        run: python desktop/ci/get_deps.py
+
+      - name: Build the interface
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build the conversion engine
+        working-directory: desktop
+        run: >
+          pyinstaller --noconfirm --clean --log-level WARN --onedir --name mediaforge-server
+          --distpath dist-py --workpath build-py --specpath build-py --paths ../backend
+          --collect-submodules app --collect-submodules uvicorn
+          --collect-all pypdfium2 --collect-all pypdfium2_raw --collect-all pillow_heif --collect-all onnxruntime
+          --collect-data docx --collect-data reportlab --collect-all pikepdf
+          --add-data "../../backend/app:app" --add-data "../../backend/models:models"
+          backend/mediaforge_server.py
+
+      - name: Test real conversions on Windows
+        run: python desktop/ci/smoke.py desktop/dist-py/mediaforge-server/mediaforge-server.exe
+
+      - name: Build the installer
+        working-directory: desktop
+        run: |
+          npm ci
+          npx electron-builder --win --x64 --publish never
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MediaForge-Windows
+          path: desktop/dist/*-Setup.exe
+
+      - name: Attach to release (tags only)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: desktop/dist/*-Setup.exe
