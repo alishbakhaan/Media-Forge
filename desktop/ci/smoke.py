@@ -47,6 +47,7 @@ def job(item, **opts):
 
 
 def main(exe):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # Windows console can't print "→" otherwise
     work = Path(tempfile.mkdtemp(prefix="mf-smoke-"))
     env = {**os.environ, "MF_WORK_DIR": str(work / "work"), "MF_CACHE_DIR": str(work / "cache"),
            "MF_FRONTEND_DIST": str(ROOT / "frontend" / "dist"), "MF_SAMPLES_DIR": str(SAMPLES),
