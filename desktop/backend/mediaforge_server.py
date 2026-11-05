@@ -9,7 +9,15 @@ import runpy
 import sys
 
 
+def utf8_output() -> None:
+    """Windows consoles default to an old code page that cannot print characters like "→"; use UTF-8 instead of crashing."""
+    for stream in (sys.stdout, sys.stderr):
+        if stream is not None and hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
+
+
 def main() -> None:
+    utf8_output()
     if len(sys.argv) >= 3 and sys.argv[1] == "-m":
         module = sys.argv[2]
         sys.argv = [module, *sys.argv[3:]]
